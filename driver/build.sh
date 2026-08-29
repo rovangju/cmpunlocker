@@ -205,12 +205,46 @@ else
 fi
 
 JOBS="$(nproc)"
-CC_CMD="gcc"
-if command -v ccache &>/dev/null; then
-    CC_CMD="ccache gcc"
-    info "ccache detected — compiler output will be cached for faster rebuilds"
+
+toolchain_is_clang() {
+    grep -qiE '\bclang\b' /proc/version 2>/dev/null && return 0
+    [[ -r "${KSRC}/.config" ]] && grep -q '^CONFIG_CC_IS_CLANG=y' "${KSRC}/.config" && return 0
+    return 1
+}
+
+MAKE_VARS=(SYSSRC="${KSRC}")
+if toolchain_is_clang; then
+    command -v clang &>/dev/null || die "Kernel ${KVER} is built with clang/LLVM, but clang is not installed. Install clang/llvm to build modules."
+    MAKE_VARS+=(LLVM=1)
+    # NVIDIA's kernel-open/Makefile hardcodes `LD ?= ld` and forwards LD/CC/OBJDUMP
+    # to kbuild, overriding the kernel's LD=ld.lld set by LLVM=1. Give the full
+    # LLVM binutils explicitly so the partial relink and module link of the
+    # (LTO) bitcode objects use ld.lld.
+    MAKE_VARS+=(
+        LD=ld.lld
+        AR=llvm-ar
+        NM=llvm-nm
+        OBJCOPY=llvm-objcopy
+        OBJDUMP=llvm-objdump
+        READELF=llvm-readelf
+        STRIP=llvm-strip
+    )
+    CC_CMD="clang"
+    CXX_CMD="clang++"
+    if command -v ccache &>/dev/null; then
+        CC_CMD="ccache clang"
+        CXX_CMD="ccache clang++"
+        info "ccache detected — compiler output will be cached for faster rebuilds"
+    fi
+    info "Kernel ${KVER} is built with clang/LLVM — using LLVM=1 toolchain"
+else
+    CC_CMD="gcc"
+    if command -v ccache &>/dev/null; then
+        CC_CMD="ccache gcc"
+        info "ccache detected — compiler output will be cached for faster rebuilds"
+    fi
 fi
-make -j"${JOBS}" modules SYSSRC="${KSRC}" CC="${CC_CMD}"
+make -j"${JOBS}" modules "${MAKE_VARS[@]}" CC="${CC_CMD}" CXX="${CXX_CMD:-g++}"
 ok "Modules built"
 if command -v ccache &>/dev/null; then
     ccache -s 2>/dev/null | sed 's/^/  /' || true
