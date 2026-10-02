@@ -124,3 +124,15 @@ unlocks:
   cmp-sku-mask:
     patch: cmp-sku-mask.patch
     registers: {}
+
+  p2p_bar1:
+    patch: 0011-p2p-bar1.patch
+    registers: {}
+
+  p2p_skip_mailbox:
+    patch: 0013-skip-mailbox-peer-preinit.patch
+    registers: {}
+
+  p2p_readcap:
+    patch: 0015-bar1p2p-readcap-override.patch
+    registers: {}

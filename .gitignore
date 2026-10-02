@@ -37,5 +37,9 @@ credentials.json
 *.cmpunlocker.patched
 *.backup
 driver/.build/
+# Downloaded by prepare-p2p.py
+/driver/patches/0011-p2p-bar1.patch
+/driver/patches/0013-skip-mailbox-peer-preinit.patch
+/driver/patches/0015-bar1p2p-readcap-override.patch
 logs/
 *.tar.gz

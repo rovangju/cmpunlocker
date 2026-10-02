@@ -57,6 +57,9 @@ PATCH_ORDER=(
     name-string.patch
     bar1-resize-unlock.patch
     cmp-sku-mask.patch
+    0011-p2p-bar1.patch
+    0013-skip-mailbox-peer-preinit.patch
+    0015-bar1p2p-readcap-override.patch
 )
 PATCH_FILES=()
 for name in "${PATCH_ORDER[@]}"; do

@@ -248,7 +248,7 @@ fi
 
 info "Configuring PCIe Gen2"
 cat > /etc/modprobe.d/cmp-pcie-gen2.conf <<'EOF'
-options nvidia NVreg_RegistryDwords="RmForceEnableGen2=1;RMPcieLinkSpeed=0x1"
+options nvidia NVreg_RegistryDwords="RmForceEnableGen2=1;RMPcieLinkSpeed=0x1;RMForceStaticBar1=1;RMPcieP2PType=1;RMForceP2PType=1;ForceP2P=0x11"
 EOF
 ok "Wrote /etc/modprobe.d/cmp-pcie-gen2.conf"
 
