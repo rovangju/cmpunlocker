@@ -21,8 +21,7 @@ REGKEY_P2P = ('options nvidia NVreg_RegistryDwords="RmForceEnableGen2=1;RMPcieLi
 # Fetch a fixed upstream revision so repeat runs use the same patch contents.
 COMMIT = "5a7bb4b7e5056306fe49e8b824787659abb19914"
 BASE_URL = f"https://raw.githubusercontent.com/bayley/cmpunlocker/{COMMIT}/driver/patches"
-# Expected order on the cmpunlocker revision described in the gist; reject other
-# layouts rather than guessing where to insert the P2P patches.
+# Reject unexpected base layouts rather than guessing where to insert the P2P patches.
 BASE_ORDER = (
     "sec2-postbl-plm-ss-cfg.patch",
     "booter-verify.patch",
@@ -35,6 +34,9 @@ BASE_ORDER = (
     "name-string.patch",
     "bar1-resize-unlock.patch",
     "cmp-sku-mask.patch",
+    "ecc-enable.patch",
+    "ecc-fbpa-static.patch",
+    "ecc-reporting.patch",
 )
 P2P_PATCHES = (
     ("p2p_bar1", "0011-p2p-bar1.patch"),
@@ -89,9 +91,9 @@ def updated_constants(text):
     if any(re.search(rf"^  {key}:", text, re.M) for key, _ in P2P_PATCHES):
         raise ValueError("Existing P2P declarations differ from section 2; refusing to overwrite")
     # Append inside unlocks only when its known final entry is still last.
-    suffix = "  cmp-sku-mask:\n    patch: cmp-sku-mask.patch\n    registers: {}\n"
+    suffix = "  ecc-reporting:\n    patch: ecc-reporting.patch\n    registers: {}\n"
     if not text.endswith(suffix):
-        raise ValueError("Expected cmp-sku-mask to be the final unlock in common/constants.yaml")
+        raise ValueError("Expected ecc-reporting to be the final unlock in common/constants.yaml")
     return text + entries
 
 
